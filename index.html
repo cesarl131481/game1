@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindAR Character Animation</title>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image.prod.js"></script>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        
+        @media (orientation: landscape) {
+            #controls {
+                bottom: 20px;
+                flex-direction: row;
+            }
+        }
+        
+        @media (orientation: portrait) {
+            #controls {
+                bottom: 20px;
+                flex-direction: row;
+            }
+        }
+        
+        .control-btn {
+            width: 80px;
+            height: 80px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+            touch-action: none;
+        }
+        
+        .control-btn:active {
+            transform: scale(0.95);
+            background: rgba(200, 200, 200, 0.9);
+        }
+        
+        #sick-btn {
+            background: rgba(255, 100, 100, 0.9);
+            color: white;
+        }
+        
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">Cargando AR...</div>
+    
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets1.mind; autoStart: false;" 
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity mindar-image-target="targetIndex: 0">
+            <!-- Superficie/plataforma -->
+            <a-plane 
+                id="platform" 
+                width="2" 
+                height="0.5" 
+                position="0 -0.5 0" 
+                rotation="-90 0 0" 
+                color="#8B4513"
+                material="opacity: 0.8">
+            </a-plane>
+            
+            <!-- Personaje -->
+            <a-plane 
+                id="character" 
+                width="0.5" 
+                height="0.5" 
+                position="0 0 0"
+                material="transparent: true; alphaTest: 0.5"
+                sprite-animation>
+            </a-plane>
+        </a-entity>
+    </a-scene>
+
+    <div id="controls">
+        <button class="control-btn" id="left-btn">◀</button>
+        <button class="control-btn" id="sick-btn">💀</button>
+        <button class="control-btn" id="right-btn">▶</button>
+    </div>
+
+    <!-- Scripts del juego -->
+    <script src="./controller.js"></script>
+    <script src="./food-manager.js"></script>
+    <script src="./game-manager.js"></script>
+    
+    <!-- Script de inicialización integrada -->
+    <script>
+        // Esperar a que todo esté cargado
+        window.addEventListener('load', () => {
+            console.log('🎮 Inicializando sistema completo...');
+            
+            // Esperar a que MindAR y el personaje estén listos
+            const waitForSetup = setInterval(() => {
+                const target = document.querySelector('[mindar-image-target]');
+                const character = document.querySelector('#character');
+                
+                if (target && character && window.CharacterActions && window.FoodManager && window.GameManager) {
+                    clearInterval(waitForSetup);
+                    
+                    // Inicializar GameManager
+                    GameManager.init();
+                    
+                    // Inicializar FoodManager con el target
+                    FoodManager.init(target);
+                    
+                    // Pre-cargar imágenes de comida
+                    FoodManager.preloadImages().then(() => {
+                        console.log('✓ Todas las imágenes de comida cargadas');
+                        
+                        // Iniciar el loop de actualización de comida
+                        startFoodUpdateLoop();
+                        
+                        // Iniciar el juego automáticamente cuando se detecte el target
+                        const startGameOnce = () => {
+                            if (!GameManager.isPlaying) {
+                                GameManager.startGame();
+                                console.log('🎮 ¡Juego iniciado!');
+                            }
+                        };
+                        
+                        // Detectar cuando el target es visible
+                        target.addEventListener('targetFound', startGameOnce);
+                        
+                        console.log('✓ Sistema completo inicializado');
+                        console.log('📍 Apunta la cámara al target para comenzar');
+                    }).catch(err => {
+                        console.error('Error cargando comida:', err);
+                    });
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
