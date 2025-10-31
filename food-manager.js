@@ -4,18 +4,18 @@
 const FoodManager = {
     foods: {
         saludable: [
-            { name: 'manzana', src: './Comida/manzana.png', azucar: -5, colesterol: -5 },
-            { name: 'brocoli', src: './Comida/brocoli.png', azucar: -10, colesterol: -5 },
+            { name: 'manzana', src: './comida/manzana.png', azucar: -5, colesterol: -5 },
+            { name: 'brocoli', src: './comida/brocoli.png', azucar: -10, colesterol: -5 },
             // Agrega más alimentos saludables aquí
         ],
         azucar: [
-            { name: 'donut', src: './Comida/donut.png', azucar: 10, colesterol: 0 },
-            { name: 'refresco', src: './Comida/refresco.png', azucar: 15, colesterol: 0 },
+            { name: 'donut', src: './comida/donut.png', azucar: 10, colesterol: 0 },
+            { name: 'refresco', src: './comida/refresco.png', azucar: 15, colesterol: 0 },
             // Agrega más alimentos con azúcar aquí
         ],
         colesterol: [
-            { name: 'hamburguesa', src: './Comida/hamburguesa.png', azucar: 0, colesterol: 15 },
-            { name: 'pizza', src: './Comida/pizza.png', azucar: 0, colesterol: 10 },
+            { name: 'hamburguesa', src: './comida/hamburguesa.png', azucar: 0, colesterol: 15 },
+            { name: 'pizza', src: './comida/pizza.png', azucar: 0, colesterol: 10 },
             // Agrega más alimentos con colesterol aquí
         ],
         mixta: [
@@ -252,4 +252,5 @@ function startFoodUpdateLoop() {
 // Auto-iniciar cuando esté listo
 if (typeof window !== 'undefined') {
     window.FoodManager = FoodManager;
+
 }
